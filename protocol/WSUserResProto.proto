@@ -1,0 +1,14 @@
+syntax ="proto3";
+package protocol;
+
+//optimize_for 加快解析的速度
+option optimize_for = SPEED;
+
+
+// 请求实体
+message WSUserResProto{
+    uint64 uid = 1;
+    string name = 2;
+    string avatar = 3;
+    string remark = 4;
+}

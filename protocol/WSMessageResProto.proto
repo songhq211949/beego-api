@@ -1,0 +1,12 @@
+syntax ="proto3";
+package protocol;
+
+//optimize_for 加快解析的速度
+option optimize_for = SPEED;
+
+// 请求实体
+message WSMessageResProto{
+    uint64 receive_id = 1;
+    int32 msg_type = 2;
+    string msg_content = 3;
+}
