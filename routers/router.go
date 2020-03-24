@@ -13,6 +13,8 @@ func init() {
 	beego.Router("/ws", &controllers.WebSocketController{}, "get:Connect")
 	//向指定的用户发送消息
 	beego.Router("/ws/send", &controllers.WebSocketController{}, "get:SendMessage")
+	//群用户列表
+	beego.Router("/group/lists", &controllers.GroupController{}, "get:Lists")
 }
 
 var filterFunc = func(ctx *context.Context) {

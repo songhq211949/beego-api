@@ -11,12 +11,12 @@ import (
 	"time"
 )
 
-//处理websocket连接的请求
+//WebSocketController 处理websocket连接的请求
 type WebSocketController struct {
 	beego.Controller
 }
 
-// Join method handles WebSocket requests for WebSocketController.加入websocket协议
+//Connect  Join method handles WebSocket requests for WebSocketController.加入websocket协议
 func (this *WebSocketController) Connect() {
 	// Upgrade from http request to WebSocket.升级为websocket协议，即进来一个就会创建一个连接
 	//websocket.Upgrader{ReadBufferSize:1024, WriteBufferSize:1024}.Upgrade 报错 websocket.Upgrader{ReadBufferSize:1024, WriteBufferSize:1024}.Upgrade

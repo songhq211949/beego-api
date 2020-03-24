@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	github.com/astaxie/beego v1.12.1
+	github.com/beego/samples v0.0.0-20180420090448-1c696ee4905b
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/golang/protobuf v1.3.5

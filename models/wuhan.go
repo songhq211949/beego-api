@@ -24,7 +24,7 @@ func init() {
 	orm.RegisterDataBase("default", "mysql", "root:root@tcp(songhq.club:3306)/him?charset=utf8")
 
 	//register model
-	orm.RegisterModel(new(Wuhan))
+	orm.RegisterModel(new(Wuhan),new(GroupUser))
 
 	//create table
 	//orm.RunSyncdb("default", false, true)

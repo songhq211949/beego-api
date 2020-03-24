@@ -13,7 +13,7 @@ const key = "beego-api-key"
 //要加密的为m,加密中用claims，包装，即为载荷
 //这个key要头部的算法，对荷载加密就是签名 ,这里最后都要转换成base64
 //这里没有自定义头部，使用 HS256
-func createToken(m map[string]interface{}) string {
+func CreateToken(m map[string]interface{}) string {
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := make(jwt.MapClaims)
 	for index, val := range m {
@@ -23,7 +23,7 @@ func createToken(m map[string]interface{}) string {
 	tokenString, _ := token.SignedString([]byte(key))
 	return tokenString
 }
-func parseToken(tokenString string) (interface{}, bool) {
+func ParseToken(tokenString string) (interface{}, bool) {
 	//这是一个匿名函数，整体是parse方法
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -41,6 +41,18 @@ func parseToken(tokenString string) (interface{}, bool) {
 	}
 }
 
+// CheckToken 检查是否合法
+func CheckToken(uid string, sid string) bool {
+	claims, ok := ParseToken(sid)
+	if ok {
+		parseUID := claims.(jwt.MapClaims)["uid"]
+		return parseUID == uid
+
+	}
+	return false
+
+}
+
 //TestJwt 测试jwt
 func TestJwt() {
 	//t := time.Now() //获取当前时间
@@ -50,9 +62,9 @@ func TestJwt() {
 	//userInfo["exp"] = strconv.FormatInt(t.UTC().UnixNano(), 10)
 	//userInfo["iat"] = "0" //在什么时候签发的
 	userInfo := make(map[string]interface{})
-	userInfo["uid"] = "123"
-	tokenString := createToken(userInfo)
-	claims, ok := parseToken(tokenString)
+	userInfo["uid"] = "2"
+	tokenString := CreateToken(userInfo)
+	claims, ok := ParseToken(tokenString)
 	if ok {
 		// oldT, _ := strconv.ParseInt(claims.(jwt.MapClaims)["exp"].(string), 10, 64)
 		// ct := t.UTC().UnixNano()
@@ -68,6 +80,6 @@ func TestJwt() {
 	} else {
 		fmt.Println("解析失败")
 	}
-	fmt.Println("加密后的tokenis", tokenString)
-	fmt.Println(claims.(jwt.MapClaims)["uid"])
+	fmt.Println("加密后的token 是", tokenString)
+	fmt.Println("uid 是",claims.(jwt.MapClaims)["uid"])
 }
