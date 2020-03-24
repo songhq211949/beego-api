@@ -20,6 +20,7 @@ func Check(ctx *context.Context) (*models.UserLoginDTO, bool) {
 		uid = ctx.GetCookie("UID")
 		sid = ctx.GetCookie("SID")
 	}
+	logs.Info("从cookie获取的uid", uid, "sid", sid)
 	//还为空的话，则不再登入状态
 	if uid == "" || sid == "" {
 		return &userLoginDTO, false

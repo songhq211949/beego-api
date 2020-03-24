@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 
+	"github.com/astaxie/beego/logs"
 	"github.com/dgrijalva/jwt-go"
 )
 
@@ -32,6 +33,7 @@ func ParseToken(tokenString string) (interface{}, bool) {
 		return []byte(key), nil
 	})
 	if err != nil {
+		logs.Error("解析jwt发生异常",err)
 		return "", false
 	}
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
@@ -62,7 +64,7 @@ func TestJwt() {
 	//userInfo["exp"] = strconv.FormatInt(t.UTC().UnixNano(), 10)
 	//userInfo["iat"] = "0" //在什么时候签发的
 	userInfo := make(map[string]interface{})
-	userInfo["uid"] = "2"
+	userInfo["uid"] = "1"
 	tokenString := CreateToken(userInfo)
 	claims, ok := ParseToken(tokenString)
 	if ok {

@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/astaxie/beego"
@@ -32,6 +33,7 @@ func (c *GroupController) Lists() {
 	}
 	uid := userLoginDTO.Uid
 	var groupUser models.GroupUser
+	//判断是不是在群里面
 	num := FindByGroupIdAndUid(groupId, uid, &groupUser)
 	logs.Info("查到的结果为，groupUser", groupUser)
 	if num == 0 {
@@ -48,10 +50,89 @@ func (c *GroupController) Lists() {
 	if err != nil {
 		limit = 20
 	}
-	if limit>500{
-		limit =500
+	if limit > 500 {
+		limit = 500
 	}
+	//查出群里面的成员
+	var groupUsers []models.GroupUser
+	page = CreateOffset(page,limit)
+	ListByGroupId(groupId, page, limit, &groupUsers)
+	logs.Info("groupsUsers 是",groupUsers)
+	//取出uid
+	uids := []int{}
+	for _, group := range groupUsers {
+		uids = append(uids, group.Uid)
+	}
+	logs.Info("该组里面的用户为", uids)
+	//返回
+	userMap ,err :=ListUserMapByUidIn(uids)
+	if err!=nil{
+		logs.Error("userMap is err",err)
+	}
+	data :=[]models.GroupIndexListResVO{}
+	for _,v:= range groupUsers{
+		listvo :=new(models.GroupIndexListResVO)
+		listvo.GroupId = v.GroupId
+		listvo.Rank = v.Rank
+		listvo.Remark=v.Remark
+		listvo.User=(*userMap)[v.Uid]
+		data = append(data,*listvo)
+	}
+	c.Data["json"] = models.ResponseOk(data)
+	c.ServeJSON()
 
+}
+func ListUserMapByUidIn(uids []int) (*map[int]models.UserInfoListResVO ,error){
+	userMap :=make(map[int]models.UserInfoListResVO)
+	users,err :=ListUserByUidIn(uids)
+	if err!=nil{
+		return &userMap,err
+	}
+	for _,value :=range *users{
+		resvo :=models.UserInfoListResVO{}
+		resvo.Uid = value.Uid
+		resvo.Avatar = value.Avatar
+		resvo.Name = value.Name
+		resvo.Remark = value.Remark
+		userMap[value.Uid] = resvo
+	}
+	return &userMap,err
+}
+
+
+func ListUserByUidIn(uids []int) (*[]models.User ,error){
+	var users  []models.User
+	if len(uids) == 0{
+		return &users,errors.New("no data")
+	}
+	var str string = "?"
+	for i := 1; i < len(uids); i++ {
+		str += ",?"
+	}
+	o := orm.NewOrm()
+	_, err := o.Raw("SELECT uid,name,avatar,remark FROM user where uid in ("+str+")", uids).QueryRows(&users)
+	if err!=nil{
+		return &users,err
+	}
+	return &users,nil
+}
+
+
+func CreateOffset(page,limit int) int{
+	return (page-1)*limit
+}
+
+func ListByGroupId(groupId int, page int, limit int, groupUsers *[]models.GroupUser) error {
+	o := orm.NewOrm()
+	_, err := o.Raw(`select id,group_id,uid,remark,rank
+	from group_user
+	where group_id = ?
+	limit ?,?`, groupId, page, limit).QueryRows(groupUsers)
+	if err != nil {
+		fmt.Println("查询发生了错误", err)
+		return err
+	}
+	return nil
 }
 
 //FindByGroupIdAndUid 根据groudId和uid查询group_user表
