@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -25,12 +26,7 @@ func (c *GroupController) Lists() {
 		return
 	}
 	// 验证登录
-	userLoginDTO, isLogin := Check(c.Ctx)
-	if !isLogin {
-		c.Data["json"] = models.ResponseError(&models.LOGIN_VERIFY_FALL)
-		c.ServeJSON()
-		return
-	}
+	userLoginDTO, _ := Check(c.Ctx)
 	uid := userLoginDTO.Uid
 	var groupUser models.GroupUser
 	//判断是不是在群里面
@@ -55,9 +51,9 @@ func (c *GroupController) Lists() {
 	}
 	//查出群里面的成员
 	var groupUsers []models.GroupUser
-	page = CreateOffset(page,limit)
+	page = CreateOffset(page, limit)
 	ListByGroupId(groupId, page, limit, &groupUsers)
-	logs.Info("groupsUsers 是",groupUsers)
+	logs.Info("groupsUsers 是", groupUsers)
 	//取出uid
 	uids := []int{}
 	for _, group := range groupUsers {
@@ -65,45 +61,60 @@ func (c *GroupController) Lists() {
 	}
 	logs.Info("该组里面的用户为", uids)
 	//返回
-	userMap ,err :=ListUserMapByUidIn(uids)
-	if err!=nil{
-		logs.Error("userMap is err",err)
+	userMap, err := ListUserMapByUidIn(uids)
+	if err != nil {
+		logs.Error("userMap is err", err)
 	}
-	data :=[]models.GroupIndexListResVO{}
-	for _,v:= range groupUsers{
-		listvo :=new(models.GroupIndexListResVO)
+	data := []models.GroupIndexListResVO{}
+	for _, v := range groupUsers {
+		listvo := new(models.GroupIndexListResVO)
 		listvo.GroupId = v.GroupId
 		listvo.Rank = v.Rank
-		listvo.Remark=v.Remark
-		listvo.User=(*userMap)[v.Uid]
-		data = append(data,*listvo)
+		listvo.Remark = v.Remark
+		listvo.User = (*userMap)[v.Uid]
+		data = append(data, *listvo)
 	}
 	c.Data["json"] = models.ResponseOk(data)
 	c.ServeJSON()
 
 }
-func ListUserMapByUidIn(uids []int) (*map[int]models.UserInfoListResVO ,error){
-	userMap :=make(map[int]models.UserInfoListResVO)
-	users,err :=ListUserByUidIn(uids)
-	if err!=nil{
-		return &userMap,err
+
+//创建群
+func (c *GroupController) Create() {
+	var requestGroup models.GroupSaveReqVO
+	data := c.Ctx.Input.RequestBody
+	err := json.Unmarshal(data, &requestGroup)
+	if err != nil {
+		logs.Error("解析json的时候异常了", err)
+		c.Data["json"] = models.ResponseError(&models.PARAM_VERIFY_FALL)
+		c.ServeJSON()
+		return
 	}
-	for _,value :=range *users{
-		resvo :=models.UserInfoListResVO{}
+	logs.Info("前端传过来的数据解析为", requestGroup)
+
+}
+
+func ListUserMapByUidIn(uids []int) (*map[int]models.UserInfoListResVO, error) {
+	userMap := make(map[int]models.UserInfoListResVO)
+	users, err := ListUserByUidIn(uids)
+	if err != nil {
+		return &userMap, err
+	}
+	for _, value := range *users {
+		resvo := models.UserInfoListResVO{}
 		resvo.Uid = value.Uid
 		resvo.Avatar = value.Avatar
 		resvo.Name = value.Name
 		resvo.Remark = value.Remark
 		userMap[value.Uid] = resvo
 	}
-	return &userMap,err
+	return &userMap, err
 }
 
-
-func ListUserByUidIn(uids []int) (*[]models.User ,error){
-	var users  []models.User
-	if len(uids) == 0{
-		return &users,errors.New("no data")
+func ListUserByUidIn(uids []int) (*[]models.User, error) {
+	var users []models.User
+	if len(uids) == 0 {
+		return &users, errors.New("no data")
 	}
 	var str string = "?"
 	for i := 1; i < len(uids); i++ {
@@ -111,15 +122,14 @@ func ListUserByUidIn(uids []int) (*[]models.User ,error){
 	}
 	o := orm.NewOrm()
 	_, err := o.Raw("SELECT uid,name,avatar,remark FROM user where uid in ("+str+")", uids).QueryRows(&users)
-	if err!=nil{
-		return &users,err
+	if err != nil {
+		return &users, err
 	}
-	return &users,nil
+	return &users, nil
 }
 
-
-func CreateOffset(page,limit int) int{
-	return (page-1)*limit
+func CreateOffset(page, limit int) int {
+	return (page - 1) * limit
 }
 
 func ListByGroupId(groupId int, page int, limit int, groupUsers *[]models.GroupUser) error {

@@ -15,6 +15,8 @@ func init() {
 	beego.Router("/ws/send", &controllers.WebSocketController{}, "get:SendMessage")
 	//群用户列表
 	beego.Router("/group/lists", &controllers.GroupController{}, "get:Lists")
+	//创建群
+	beego.Router("/group/create", &controllers.GroupController{}, "post:Create")
 }
 
 var filterFunc = func(ctx *context.Context) {

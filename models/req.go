@@ -56,3 +56,24 @@ type WSUserReqVO struct {
 	 */
 	Remark string
 }
+type GroupSaveReqVO struct{
+	/**
+     * 群ID
+     */
+	 GroupId int
+
+	 /**
+	  * 群昵称
+	  */
+	 Name string
+ 
+	 /**.
+	  * 群头像
+	  */
+	 Avatar string  
+ 
+	 /**.
+	  * 说明
+	  */
+	 Remark string
+}
