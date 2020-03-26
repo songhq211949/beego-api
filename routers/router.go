@@ -5,6 +5,7 @@ import (
 	"github.com/astaxie/beego/context"
 	"github.com/songhq211949/beego-api/controllers"
 )
+
 //引入包就会初始化执行
 func init() {
 	//武汉疫情数据
@@ -17,6 +18,11 @@ func init() {
 	beego.Router("/group/lists", &controllers.GroupController{}, "get:Lists")
 	//创建群
 	beego.Router("/group/create", &controllers.GroupController{}, "post:Create")
+	//群消息列表
+	beego.Router("group/msg/lists", &controllers.GroupController{}, "get:MsgLists")
+	//群发送消息
+	beego.Router("group/msg/create", &controllers.GroupController{}, "post:MsgCreate")
+
 }
 
 var filterFunc = func(ctx *context.Context) {
