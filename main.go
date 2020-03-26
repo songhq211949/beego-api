@@ -28,8 +28,11 @@ func main() {
 			logs.Error("登入失败")
 		}
 	}
+	//^(?!(/user/login/*)).*$,beego不支持
+	//^((?!login).)*$
 	//统一校验用户需合法的登入状态，请注意，登入和在线是两回事，没有手动推出登入都可视为登入状态
-	beego.InsertFilter("*", beego.BeforeRouter, FilterLogin, true)
+	beego.InsertFilter("/group/*", beego.BeforeRouter, FilterLogin, true)
+	beego.InsertFilter("/user/friendAsk/*", beego.BeforeRouter, FilterLogin, true)
 	beego.InsertFilter("*", beego.BeforeRouter, cors.Allow(&cors.Options{
 		AllowAllOrigins:  true,
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},

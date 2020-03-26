@@ -1,8 +1,6 @@
 package models
 
-
-
-//武汉VO
+//Wuhan 武汉VO
 type Wuhan struct {
 	Date        string `orm:"pk" json:"date"` //以空格区分打多个tag
 	SureAdd     string `json:"sureAdd"`
@@ -12,4 +10,3 @@ type Wuhan struct {
 	RecoveryAdd string `json:"recoveryAdd"`
 	RecoverySum string `json:"recoverySum"`
 }
-

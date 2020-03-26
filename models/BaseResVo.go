@@ -25,7 +25,7 @@ var DATA_REPEAT = ResponseCode{Code: 6, Message: "数据已存在~"}
 //ResponseOk 返回ok
 func ResponseOk(data interface{}) *BaseResVO {
 	result := new(BaseResVO)
-	result.Code = 200
+	result.Code = 0
 	result.Message = "success"
 	result.Data = data
 	return result

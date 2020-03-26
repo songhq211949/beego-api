@@ -16,13 +16,16 @@ func init() {
 	beego.Router("/ws/send", &controllers.WebSocketController{}, "get:SendMessage")
 	//群用户列表
 	beego.Router("/group/lists", &controllers.GroupController{}, "get:Lists")
-	//创建群
+	//群创建
 	beego.Router("/group/create", &controllers.GroupController{}, "post:Create")
 	//群消息列表
 	beego.Router("group/msg/lists", &controllers.GroupController{}, "get:MsgLists")
 	//群发送消息
 	beego.Router("group/msg/create", &controllers.GroupController{}, "post:MsgCreate")
-
+	//登入by用户名和密码
+	beego.Router("/user/login/byPwd", &controllers.LoginController{}, "post:ByPwd")
+	//登入后用户的信息
+	beego.Router("/user/loginInfo", &controllers.UserController{}, "get:LoginInfo")
 }
 
 var filterFunc = func(ctx *context.Context) {

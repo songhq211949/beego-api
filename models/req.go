@@ -136,10 +136,27 @@ type GroupMsgListResVO struct {
 	GroupMsg
 	UserInfoListResVO
 }
-//GroupMsgCreateReqVO 
-type GroupMsgCreateReqVO struct{
 
-	GroupId int
-	MsgType int
+//GroupMsgCreateReqVO 群消息
+type GroupMsgCreateReqVO struct {
+	GroupId    int
+	MsgType    int
 	MsgContent string
+}
+
+//UserLoginPwdReqVO 账号密码
+type UserLoginPwdReqVO struct {
+	UserName string `form:"userName"`
+	Password string `form:"password"`
+}
+type UserProfile struct {
+	Id             int
+	Uid            int
+	FriendAskCount int `json:"friendAskCount"`
+	FriendCount    int `json:"friendCount"`
+	BaseTime
+}
+type UserInfoResVO struct {
+	User
+	Profile UserProfile `json:"profile"`
 }
