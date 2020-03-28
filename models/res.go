@@ -20,6 +20,14 @@ type UserLoginDTO struct {
 
 //userLoginResVO 用户登入vo
 type UserLoginResVO struct {
-	Uid int `json:"uid"`
+	Uid int    `json:"uid"`
 	Sid string `json:"sid"`
+}
+type UserFriendListInfoResVO struct {
+	UserFriend
+	User UserInfoListResVO `json:"user"`
+}
+type GroupUserListResVO struct {
+	GroupUser
+	Group Group `json:"group"`
 }

@@ -139,7 +139,7 @@ func SendMsg(receiverUid int, wsBaseReqVO models.WSBaseReqVO) {
 	}
 	if ws != nil {
 		//writeMessage,向该连接中写入数据
-		if ws.WriteMessage(websocket.TextMessage, data) != nil {
+		if ws.WriteMessage(websocket.BinaryMessage, data) != nil {
 			logs.Info("用户不在线,用户id为", receiverUid)
 			LeaveMap(receiverUid)
 		}

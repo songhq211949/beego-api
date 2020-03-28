@@ -1,8 +1,6 @@
 package models
 
 import (
-	"os"
-
 	"github.com/astaxie/beego/orm"     //初始化数据库用的
 	_ "github.com/go-sql-driver/mysql" //使用的mysql数据驱动
 )
@@ -14,10 +12,10 @@ func init() {
 	orm.RegisterDataBase("default", "mysql", "root:root@tcp(songhq.club:3306)/him?charset=utf8&loc=Asia%2FShanghai&parseTime=true")
 
 	//register model
-	orm.RegisterModel(new(Wuhan), new(GroupUser), new(Group), new(GroupMsg), new(User),new(UserProfile))
+	orm.RegisterModel(new(Wuhan), new(GroupUser), new(Group), new(GroupMsg), new(User), new(UserProfile), new(UserFriend))
 	//设置打印日志
-	orm.Debug = true
-	orm.DebugLog = orm.NewLog(os.Stdout)
+	//orm.Debug = true
+	//orm.DebugLog = orm.NewLog(os.Stdout)
 
 	//create table
 	//orm.RunSyncdb("default", false, true)

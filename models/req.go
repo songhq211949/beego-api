@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 //websocket 通信类
 type WSBaseReqVO struct {
 	/**
@@ -82,27 +84,27 @@ type Group struct {
 	/**
 	* 群ID
 	 */
-	GroupId int `orm:"auto"`
+	GroupId int `orm:"auto" json:"groupId"`
 	/**
 	 * 创建者用户ID
 	 */
-	Uid int
+	Uid int `json:"uid"`
 	/**
 	 * 群昵称
 	 */
-	Name string
+	Name string `json:"name"`
 	/**
 	 * 群头像
 	 */
-	Avatar string
+	Avatar string `json:"avatar"`
 	/**
 	 * 成员数量
 	 */
-	MemberNum int
+	MemberNum int `json:"memberNum"`
 	/**
 	 * 描述
 	 */
-	Remark string
+	Remark string `json:"remark"`
 	BaseTime
 }
 
@@ -114,19 +116,19 @@ type GroupMsg struct {
 	/**
 	 * 群ID
 	 */
-	GroupId int
+	GroupId int `json:groupId`
 	/**
 	 * 发送消息的用户ID
 	 */
-	SenderUid int
+	SenderUid int `json:"senderUid"`
 	/**
 	 * 消息类型（0：普通文字消息，1：图片消息，2：文件消息，3：语音消息，4：视频消息）
 	 */
-	MsgType int
+	MsgType int `json:"msgType"`
 	/**
 	 * 消息内容
 	 */
-	MsgContent string
+	MsgContent string `json:"msgContent"`
 
 	BaseTime
 }
@@ -134,7 +136,7 @@ type GroupMsg struct {
 //消息列表
 type GroupMsgListResVO struct {
 	GroupMsg
-	UserInfoListResVO
+	User UserInfoListResVO `json:"user"`
 }
 
 //GroupMsgCreateReqVO 群消息
@@ -159,4 +161,108 @@ type UserProfile struct {
 type UserInfoResVO struct {
 	User
 	Profile UserProfile `json:"profile"`
+}
+type UserFriend struct {
+	/**
+	* 自增id
+	 */
+	Id int `orm:"auto" json:"id"`
+	/**
+	 * 用户id
+	 */
+	Uid int `json:"uid"`
+	/**
+	 * 朋友的用户id
+	 */
+	FriendUid int `json:"friendUid"`
+	/**
+	 * 备注
+	 */
+	Remark string `json:"remark"`
+	/**
+	 * 未读消息数量
+	 */
+	UnMsgCount int `json:"unMsgCount"`
+	/**
+	 * 最后一次接收的消息内容
+	 */
+	LastMsgContent string `json:"lastMsgContent"`
+	BaseTime
+}
+type BaseTime struct {
+	CreateTime   time.Time `json:"createTime"`
+	ModifiedTime time.Time `json:"modifiedTime"`
+}
+
+type GroupUser struct {
+	Id             int       `json:"id" orm:"auto"`
+	GroupId        int       `json:"groupId"`
+	Uid            int       `json:"uid"`
+	Remark         string    `json:"remark"`
+	LastAckMsgId   int       `json:"lastACkMsgId"`   // 最后一次确认的消息ID
+	LastMsgContent string    `json:"lastMsgContent"` //最后一次的消息内容
+	LastMsgTime    time.Time `json:"lastMsgTime"`    //最后一次的消息时间
+	UnMsgCount     int       `json:"unMsgCount"`
+	Rank           int       `json:"rank"` //等级（0：普通成员，1：管理员，2：群主）
+	BaseTime
+}
+type UserInfoListResVO struct {
+	/**
+	 * 用户id
+	 */
+	Uid int `json:"uid"`
+	/**
+	 * 用户昵称
+	 */
+	Name string `json:"name"`
+	/**
+	 * 用户头像
+	 */
+	Avatar string `json:"avatar"`
+	/**
+	 * 个性签名
+	 */
+	Remark string `json:"remark"`
+}
+type User struct {
+	/**
+	s	 * 用户id
+	*/
+	Uid int `json:"uid" orm:"pk"`
+	/**
+	 * 用户昵称
+	 */
+	Name string `json:"name"`
+	/**
+	 * 用户头像
+	 */
+	Avatar string `json:"avatar"`
+	/**
+	 * 个性签名
+	 */
+	Remark string `json:"remark"`
+
+	//密码
+	Pwd string `json:"pwd"`
+
+	BaseTime
+}
+type GroupIndexListResVO struct {
+	/**
+	 * 群ID
+	 */
+	GroupId int `json:"groupId"`
+	/**
+	 * 说明
+	 */
+	Remark string `json:"remark"`
+	/**
+	 * 等级（0：普通成员，1：管理员，2：群主）
+	 */
+	Rank int `json:"rank"`
+
+	/**
+	 * 用户信息
+	 */
+	User UserInfoListResVO `json:"user"`
 }

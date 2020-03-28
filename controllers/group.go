@@ -205,7 +205,7 @@ func (c *GroupController) MsgLists() {
 	for _, v := range groupMsgs {
 		listvo := new(models.GroupMsgListResVO)
 		listvo.GroupMsg = v
-		listvo.UserInfoListResVO = (*userMap)[v.SenderUid]
+		listvo.User = (*userMap)[v.SenderUid]
 		data = append(data, *listvo)
 	}
 	c.Data["json"] = models.ResponseOk(data)
@@ -245,6 +245,54 @@ func (c *GroupController) MsgCreate() {
 	}
 	c.Data["json"] = models.ResponseOk([]int{})
 	c.ServeJSON()
+}
+func (c *GroupController) Userlists() {
+	// 验证登录
+	userLoginDTO, _ := Check(c.Ctx)
+	uid := userLoginDTO.Uid
+	page, err := c.GetInt("page")
+	if err != nil {
+		page = 1
+	}
+	limit, err := c.GetInt("limit")
+	if err != nil {
+		limit = 20
+	}
+	if limit > 500 {
+		limit = 500
+	}
+	page = CreateOffset(page, limit)
+	var groupUsers []models.GroupUser
+	queryErr := GroupUserByUid(uid, page, limit, &groupUsers)
+	if queryErr != nil {
+		c.Data["json"] = models.ResponseError(&models.NOT_NETWORK)
+		c.ServeJSON()
+		return
+	}
+	//取出groupid
+	groupIds := []int{}
+	for _, groupUser := range groupUsers {
+		groupIds = append(groupIds, groupUser.GroupId)
+	}
+	//返回
+	groupMap, err := ListGroupMapByUidIn(groupIds)
+	data := []models.GroupUserListResVO{}
+	for _, groupUser := range groupUsers {
+		groupUserVo := new(models.GroupUserListResVO)
+		groupUserVo.Group = (*groupMap)[groupUser.GroupId]
+		groupUserVo.GroupUser = groupUser
+		data = append(data, *groupUserVo)
+	}
+	c.Data["json"] = models.ResponseOk(&data)
+	c.ServeJSON()
+}
+func GroupUserByUid(uid, page, limit int, groupUsers *[]models.GroupUser) error {
+	o := orm.NewOrm()
+	_, err := o.Raw(`select id,group_id,uid,last_ack_msg_id,last_msg_content,un_msg_count,rank,last_msg_time
+	from group_user
+	where uid = ?
+	limit ?,?`, uid, page, limit).QueryRows(groupUsers)
+	return err
 }
 
 //SendGroupMsg 群发消息
@@ -353,7 +401,17 @@ func ListUserMapByUidIn(uids []int) (*map[int]models.UserInfoListResVO, error) {
 	}
 	return &userMap, err
 }
-
+func ListGroupMapByUidIn(groupIds []int) (*map[int]models.Group, error) {
+	groupMap := make(map[int]models.Group)
+	groups, err := ListGroupByUidIn(groupIds)
+	if err != nil {
+		return &groupMap, err
+	}
+	for _, value := range *groups {
+		groupMap[value.GroupId] = value
+	}
+	return &groupMap, err
+}
 func ListUserByUidIn(uids []int) (*[]models.User, error) {
 	var users []models.User
 	if len(uids) == 0 {
@@ -369,6 +427,23 @@ func ListUserByUidIn(uids []int) (*[]models.User, error) {
 		return &users, err
 	}
 	return &users, nil
+}
+func ListGroupByUidIn(groupIds []int) (*[]models.Group, error) {
+	var groups []models.Group
+	if len(groupIds) == 0 {
+		return &groups, errors.New("no data")
+	}
+	var str string = "?"
+	for i := 1; i < len(groupIds); i++ {
+		str += ",?"
+	}
+	o := orm.NewOrm()
+	//group表名mysql中是关键字，这个要注意
+	_, err := o.Raw("SELECT group_id,uid,name,avatar,member_num,remark,create_time,modified_time FROM `group` where group_id in ("+str+")", groupIds).QueryRows(&groups)
+	if err != nil {
+		return &groups, err
+	}
+	return &groups, nil
 }
 
 func CreateOffset(page, limit int) int {

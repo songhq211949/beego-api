@@ -15,6 +15,7 @@ type UserController struct {
 	beego.Controller
 }
 
+//LoginInfo  登入后的用户信息
 func (c *UserController) LoginInfo() {
 	// 获取登入信息
 	userLoginDTO, _ := Check(c.Ctx)
@@ -47,6 +48,58 @@ func (c *UserController) LoginInfo() {
 	c.ServeJSON()
 	return
 
+}
+
+//FriendLists 好友列表
+func (c *UserController) FriendLists() {
+	// 获取登入信息
+	userLoginDTO, _ := Check(c.Ctx)
+	uid := userLoginDTO.Uid
+	page, err := c.GetInt("page")
+	if err != nil {
+		page = 1
+	}
+	limit, err := c.GetInt("limit")
+	if err != nil {
+		limit = 20
+	}
+	if limit > 50 {
+		limit = 50
+	}
+	page = CreateOffset(page, limit)
+	var userFriends []models.UserFriend
+	queryErr := UserFriendsByUid(uid, page, limit, &userFriends)
+	if queryErr != nil {
+		c.Data["json"] = models.ResponseError(&models.NOT_NETWORK)
+		c.ServeJSON()
+		return
+	}
+	//取出uid
+	uids := []int{}
+	for _, userFriend := range userFriends {
+		uids = append(uids, userFriend.FriendUid)
+	}
+	//返回
+	userMap, err := ListUserMapByUidIn(uids)
+	data := []models.UserFriendListInfoResVO{}
+	for _, userFriend := range userFriends {
+		userFriendVo := new(models.UserFriendListInfoResVO)
+		userFriendVo.User = (*userMap)[userFriend.FriendUid]
+		userFriendVo.UserFriend = userFriend
+		data = append(data, *userFriendVo)
+	}
+	c.Data["json"] = models.ResponseOk(&data)
+	c.ServeJSON()
+}
+
+//查询UserFriend
+func UserFriendsByUid(uid, page, limit int, userFriends *[]models.UserFriend) error {
+	o := orm.NewOrm()
+	_, err := o.Raw(`select id,uid,friend_uid,remark,un_msg_count,last_msg_content,modified_time
+	from user_friend
+	where uid = ?
+	limit ?,?`, uid, page, limit).QueryRows(userFriends)
+	return err
 }
 
 //Check 验证用户登入
