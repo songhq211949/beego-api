@@ -24,6 +24,12 @@ func init() {
 	beego.Router("/api/group/msg/create", &controllers.GroupController{}, "post:MsgCreate")
 	//群列表（用户所在哪些群）
 	beego.Router("/api/group/user/lists", &controllers.GroupController{}, "get:Userlists")
+    //读取未读群消息
+	beego.Router("/api/group/user/clearUnMsgCount", &controllers.GroupController{}, "post:ClearUnMsgCount")
+	//群二维码
+	beego.Router("/api/group/user/getCheckCode", &controllers.GroupController{}, "get:GetCheckCode")
+	//通过群二维码加入该群
+	beego.Router("/api/group/user/create", &controllers.GroupController{}, "post:GroupUserCreate")
 
 	//登入by用户名和密码
 	beego.Router("/api/user/login/byPwd", &controllers.LoginController{}, "post:ByPwd")
@@ -31,6 +37,8 @@ func init() {
 	beego.Router("/api/user/loginInfo", &controllers.UserController{}, "get:LoginInfo")
 	//用户列表
 	beego.Router("/api/user/friend/lists", &controllers.UserController{}, "get:FriendLists")
+
+	
 }
 
 var filterFunc = func(ctx *context.Context) {

@@ -4,12 +4,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/songhq211949/beego-api/models"
+	"github.com/songhq211949/beego-api/utils"
 )
 
 //GroupController 组消息管理
@@ -286,6 +289,126 @@ func (c *GroupController) Userlists() {
 	c.Data["json"] = models.ResponseOk(&data)
 	c.ServeJSON()
 }
+
+//ClearUnMsgCount 读取未读消息
+func (c *GroupController) ClearUnMsgCount() {
+	groupId, err := c.GetInt("groupId")
+	if err != nil {
+		logs.Error("获取参数的时候异常了", err)
+		c.Data["json"] = models.ResponseError(&models.PARAM_VERIFY_FALL)
+		c.ServeJSON()
+		return
+	}
+	loginUser, _ := Check(c.Ctx)
+	var groupUser models.GroupUser
+	if num := FindByGroupIdAndUid(groupId, loginUser.Uid, &groupUser); num == 0 {
+		c.Data["json"] = models.ResponseErrorCode(models.PARAM_VERIFY_FALL.Code, "请先加入群~")
+		c.ServeJSON()
+		return
+	}
+	if err := ClearUnMsgCountByGroupIdAndUid(loginUser.Uid, groupId); err != nil {
+		c.Data["json"] = models.ResponseError(&models.NOT_NETWORK)
+		c.ServeJSON()
+		return
+	}
+	c.Data["json"] = models.ResponseOk([]int{})
+	c.ServeJSON()
+
+}
+
+//GetCheckCode 生成群二维码
+func (c *GroupController) GetCheckCode() {
+	groupId, err := c.GetInt("groupId")
+	if err != nil {
+		logs.Error("获取参数的时候异常了", err)
+		c.Data["json"] = models.ResponseError(&models.PARAM_VERIFY_FALL)
+		c.ServeJSON()
+		return
+	}
+	loginUser, _ := Check(c.Ctx)
+	var groupUser models.GroupUser
+	if num := FindByGroupIdAndUid(groupId, loginUser.Uid, &groupUser); num == 0 {
+		c.Data["json"] = models.ResponseErrorCode(models.PARAM_VERIFY_FALL.Code, "请先加入群~")
+		c.ServeJSON()
+		return
+	}
+	groupIdStr := strconv.Itoa(groupId)
+	tokentString := utils.CreateToken(groupIdStr)
+	c.Data["json"] = models.ResponseOk(tokentString)
+	c.ServeJSON()
+}
+
+//GroupUserCreate 通过二维码加入群
+func (c *GroupController) GroupUserCreate() {
+	checkCode := c.GetString("checkCode")
+	claims, ok := utils.ParseToken(checkCode)
+	if !ok {
+		c.Data["json"] = models.ResponseErrorCode(models.PARAM_VERIFY_FALL.Code, "二维码已过期~")
+		c.ServeJSON()
+		return
+	}
+	groupId := claims.(jwt.MapClaims)["uid"]
+	groupIdStr := groupId.(string)
+	groupIdInt64, _ := strconv.ParseInt(groupIdStr, 10, 64)
+	groupIdInt := int(groupIdInt64)
+	var group models.Group
+	if err := FindGroupByGroupId(groupIdInt, &group); err != nil {
+		logs.Error("查询group发生异常", err)
+		c.Data["json"] = models.ResponseError(&models.NOT_NETWORK)
+		c.ServeJSON()
+		return
+	}
+	loginUser, _ := Check(c.Ctx)
+	var groupUser models.GroupUser
+	if num := FindByGroupIdAndUid(groupIdInt, loginUser.Uid, &groupUser); num == 1 {
+		c.Data["json"] = models.ResponseErrorCode(models.PARAM_VERIFY_FALL.Code, "已在当前群聊~")
+		c.ServeJSON()
+		return
+	}
+	//加入群列表
+	groupUser = models.GroupUser{
+		GroupId: groupIdInt,
+		Uid:     loginUser.Uid,
+		Rank:    0, //群主
+	}
+	groupUser.CreateTime = time.Now()
+	groupUser.ModifiedTime = groupUser.CreateTime
+	_, err := OrmInsertAotoId(&groupUser)
+	if err != nil {
+		logs.Error("插入groupUser时候异常了", err)
+		c.Data["json"] = models.ResponseError(&models.NOT_NETWORK)
+		c.ServeJSON()
+		return
+	}
+	msgType := 0 //代表是文字类型
+	//追加群消息
+	lastMsgContent := "嗨！骚年们~"
+	SendGroupMsg(loginUser.Uid, groupIdInt, models.JOIN_GROUP, msgType, lastMsgContent)
+	groupUserListResVO := new(models.GroupUserListResVO)
+	groupUserListResVO.GroupUser = groupUser
+	groupUserListResVO.LastMsgContent = lastMsgContent
+	groupUserListResVO.LastMsgTime = time.Now()
+	groupUserListResVO.UnMsgCount = 1
+	groupUserListResVO.Group = group
+	c.Data["json"] = models.ResponseOk(&groupUserListResVO)
+	c.ServeJSON()
+
+}
+func FindGroupByGroupId(groupId int, group *models.Group) error {
+	o := orm.NewOrm()
+	err := o.QueryTable("group").Filter("groupId", groupId).One(group)
+	return err
+}
+func ClearUnMsgCountByGroupIdAndUid(uid, groupId int) error {
+	o := orm.NewOrm()
+	_, err := o.QueryTable("group_user").Filter("group_id", groupId).Filter("uid", uid).Update(orm.Params{
+		"UnMsgCount":   0,
+		"ModifiedTime": time.Now(),
+	})
+	return err
+
+}
+
 func GroupUserByUid(uid, page, limit int, groupUsers *[]models.GroupUser) error {
 	o := orm.NewOrm()
 	_, err := o.Raw(`select id,group_id,uid,last_ack_msg_id,last_msg_content,un_msg_count,rank,last_msg_time
