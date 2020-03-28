@@ -266,3 +266,43 @@ type GroupIndexListResVO struct {
 	 */
 	User UserInfoListResVO `json:"user"`
 }
+
+//UserFriendMsg 好友消息
+type UserFriendMsg struct {
+	/**
+	* 消息ID
+	 */
+	MsgId int `json:"msgId" orm:"auto"`
+	/**
+	 * 用户ID
+	 */
+	Uid int `json:"uid"`
+	/**
+	 * 和上面的uid做查询用
+	 */
+	ToUid int `json:"toUid"`
+	/**
+	 * 发送方用户ID
+	 */
+	SenderUid int `json:"senderUid"`
+	/**
+	 * 消息类型（0：普通文字消息，1：图片消息，2：文件消息，3：语音消息，4：视频消息）
+	 */
+	MsgType int `json:"msgType"`
+	/**
+	 * 消息内容
+	 */
+	MsgContent string `json:"msgContent"`
+	/**
+	 * 消息创建时间
+	 */
+	CreateTime time.Time `json:"createTime"`
+}
+type UserFriendMsgSaveReqVO struct {
+	ReceiverUid int
+	MsgType     int
+	MsgContent  string
+}
+type UserFriendMsgClearMsgCountReqVO struct {
+	ReceiverUid int
+}

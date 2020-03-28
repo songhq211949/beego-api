@@ -57,7 +57,7 @@ func (c *GroupController) Lists() {
 	var groupUsers []models.GroupUser
 	page = CreateOffset(page, limit)
 	ListByGroupId(groupId, page, limit, &groupUsers)
-	logs.Info("groupsUsers 是", groupUsers)
+	//logs.Info("groupsUsers 是", groupUsers)
 	//取出uid
 	uids := []int{}
 	for _, group := range groupUsers {
@@ -192,7 +192,7 @@ func (c *GroupController) MsgLists() {
 		return
 	}
 
-	logs.Info("groupMsgs 是", groupMsgs)
+	//logs.Info("groupMsgs 是", groupMsgs)
 	//取出uid
 	uids := []int{}
 	for _, group := range groupMsgs {
@@ -471,7 +471,7 @@ func SendGroupMsg(uid, groupId, wsType, msgType int, msgContent string) bool {
 	//查出群里面的成员
 	var groupUsers []models.GroupUser
 	ListByGroupId(groupId, 0, 500, &groupUsers)
-	logs.Info("groupsUsers 是", groupUsers)
+	//logs.Info("groupsUsers 是", groupUsers)
 	for _, group := range groupUsers {
 		if group.Uid != uid {
 			SendMsg(group.Uid, wsBaseReqVo)
