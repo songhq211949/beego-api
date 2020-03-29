@@ -30,7 +30,8 @@ func init() {
 	beego.Router("/api/group/user/getCheckCode", &controllers.GroupController{}, "get:GetCheckCode")
 	//通过群二维码加入该群
 	beego.Router("/api/group/user/create", &controllers.GroupController{}, "post:GroupUserCreate")
-
+	//登入通过qq第三方账号
+	beego.Router("/api/user/login/byQq", &controllers.LoginController{}, "post:ByQq")
 	//登入by用户名和密码
 	beego.Router("/api/user/login/byPwd", &controllers.LoginController{}, "post:ByPwd")
 	//登入后用户的信息
@@ -43,6 +44,16 @@ func init() {
 	beego.Router("/api/user/friendMsg/create", &controllers.UserController{}, "post:FriendMsgCreate")
 	//读取未读朋友消息 /api/user/friendMsg/clearUnMsgCount
 	beego.Router("/api/user/friendMsg/clearUnMsgCount", &controllers.UserController{}, "post:ClearUnMsgCount")
+	//新的朋友
+	beego.Router("api/user/friendAsk/lists", &controllers.UserController{}, "get:FriendAskLists")
+	//用户加好友的二维码
+	beego.Router("api/user/getQRCheckCode", &controllers.UserController{}, "get:GetQRCheckCode")
+	//扫二维码添加好友
+	beego.Router("api/user/friendAsk/create", &controllers.UserController{}, "post:FriendAskcreate")
+	//确认添加好友请求或拒绝好久请求
+	beego.Router("api/user/friendAsk/ack", &controllers.UserController{}, "post:FriendAskAck")
+	///清除好友请求
+	beego.Router("api/user/friendAsk/clearFriendAskCount", &controllers.UserController{}, "post:ClearFriendAskCount")
 }
 
 var filterFunc = func(ctx *context.Context) {

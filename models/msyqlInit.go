@@ -12,7 +12,8 @@ func init() {
 	orm.RegisterDataBase("default", "mysql", "root:root@tcp(songhq.club:3306)/him?charset=utf8&loc=Asia%2FShanghai&parseTime=true")
 
 	//register model
-	orm.RegisterModel(new(Wuhan), new(GroupUser), new(Group), new(GroupMsg), new(User), new(UserProfile), new(UserFriend), new(UserFriendMsg))
+	orm.RegisterModel(new(Wuhan), new(GroupUser), new(Group), new(GroupMsg), new(User), new(UserProfile),
+		new(UserFriend), new(UserFriendMsg), new(UserFriendAsk),new(UserQq))
 	//设置打印日志
 	//orm.Debug = true
 	//orm.DebugLog = orm.NewLog(os.Stdout)

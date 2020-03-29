@@ -306,3 +306,33 @@ type UserFriendMsgSaveReqVO struct {
 type UserFriendMsgClearMsgCountReqVO struct {
 	ReceiverUid int
 }
+type UserFriendAsk struct {
+	Id int `orm:"auto" json:"id"`
+	/**
+	 * 用户ID
+	 */
+	Uid int `json:"json"`
+	/**
+	 * 发送消息的用户ID
+	 */
+	FriendUid int `json:"friendUid"`
+	/**
+	 * 备注信息
+	 */
+	Remark string `json:"remark"`
+	/**
+	 * 状态（0：未确认过，1：已确认, 2: 已拒绝）
+	 */
+	Status int `json:"status"`
+	BaseTime
+}
+
+//UserFriendAskAckReqVO 确认或取消好友请求
+type UserFriendAskAckReqVO struct {
+	Id int
+
+	/**
+	 * 状态
+	 */
+	Status int
+}
