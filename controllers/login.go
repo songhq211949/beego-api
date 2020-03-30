@@ -116,6 +116,7 @@ func GetUserInfo(accessToken, openId string) *models.QqUserInfoResVO {
 		"&openid=" + openId + "&oauth_consumer_key=" + appId
 	resp, err := http.Get(url)
 	if err != nil {
+		logs.Error("请求", url, "失败", err)
 		return vo
 	}
 	defer resp.Body.Close()
@@ -137,6 +138,7 @@ func GetOpenID(accessToken string) *models.QqOpenIdResVO {
 	url := "https://graph.qq.com/oauth2.0/me?" + "access_token=" + accessToken
 	resp, err := http.Get(url)
 	if err != nil {
+		logs.Error("请求", url, "失败", err)
 		return vo
 	}
 	defer resp.Body.Close()
@@ -164,6 +166,7 @@ func GetAccessToken(code, redirect_uri string) string {
 		"&redirect_uri=" + redirect_uri
 	resp, err := http.Get(url)
 	if err != nil {
+		logs.Error("请求", url, "失败", err)
 		return ""
 	}
 	defer resp.Body.Close()

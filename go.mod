@@ -10,6 +10,7 @@ require (
 	github.com/golang/protobuf v1.3.5
 	github.com/gorilla/websocket v1.4.2
 	github.com/shiena/ansicolor v0.0.0-20151119151921-a422bbe96644 // indirect
+	github.com/siddontang/go v0.0.0-20180604090527-bdc77568d726
 	github.com/smartwalle/alipay v1.0.2 // indirect
 	google.golang.org/appengine v1.6.5 // indirect
 )
