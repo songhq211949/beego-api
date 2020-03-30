@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
-	"io"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
@@ -115,6 +115,7 @@ func GetUserInfo(accessToken, openId string) *models.QqUserInfoResVO {
 	url := "https://graph.qq.com/user/get_user_info?" + "access_token=" + accessToken +
 		"&openid=" + openId + "&oauth_consumer_key=" + appId
 	resp, err := http.Get(url)
+	logs.Info("GetUserInfo 的url是", url)
 	if err != nil {
 		logs.Error("请求", url, "失败", err)
 		return vo
@@ -122,21 +123,16 @@ func GetUserInfo(accessToken, openId string) *models.QqUserInfoResVO {
 	defer resp.Body.Close()
 	logs.Info("qq返回的消息是", resp)
 	//获取响应内容
-	c := make([]byte, 2048)
-	var result string
-	for {
-		n, err := resp.Body.Read(c)
-		if err != nil && io.EOF == err {
-			break
-		}
-		result += string(c[:n])
-	}
+	resultByte, err := ioutil.ReadAll(resp.Body)
+	result := string(resultByte)
+	logs.Info("GetUserInfo 的返回体是", result)
 	json.Unmarshal([]byte(result), vo)
 	return vo
 }
 func GetOpenID(accessToken string) *models.QqOpenIdResVO {
 	vo := new(models.QqOpenIdResVO)
 	url := "https://graph.qq.com/oauth2.0/me?" + "access_token=" + accessToken
+	logs.Info("GetOpenID 的url是", url)
 	resp, err := http.Get(url)
 	if err != nil {
 		logs.Error("请求", url, "失败", err)
@@ -144,16 +140,9 @@ func GetOpenID(accessToken string) *models.QqOpenIdResVO {
 	}
 	logs.Info("qq返回的消息是", resp)
 	defer resp.Body.Close()
-	//获取响应内容
-	c := make([]byte, 2048)
-	var result string
-	for {
-		n, err := resp.Body.Read(c)
-		if err != nil && io.EOF == err {
-			break
-		}
-		result += string(c[:n])
-	}
+	resultByte, err := ioutil.ReadAll(resp.Body)
+	result := string(resultByte)
+	logs.Info("GetOpenID 的返回体是", result)
 	index1 := strings.Index(result, "(")
 	index2 := strings.Index(result, ")")
 	jsonStr := result[index1+1 : index2]
@@ -166,6 +155,7 @@ func GetAccessToken(code, redirect_uri string) string {
 	url := "https://graph.qq.com/oauth2.0/token?" + "grant_type=authorization_code&" +
 		"client_id=" + appId + "&client_secret=" + appIdKey + "&code=" + code +
 		"&redirect_uri=" + redirect_uri
+	logs.Info("GetAccessToken 的url是", url)
 	resp, err := http.Get(url)
 	logs.Info("qq返回的消息是", resp)
 	if err != nil {
@@ -173,16 +163,8 @@ func GetAccessToken(code, redirect_uri string) string {
 		return ""
 	}
 	defer resp.Body.Close()
-	//获取响应内容
-	c := make([]byte, 2048)
-	var result string
-	for {
-		n, err := resp.Body.Read(c)
-		if err != nil && io.EOF == err {
-			break
-		}
-		result += string(c[:n])
-	}
+	resultByte, err := ioutil.ReadAll(resp.Body)
+	result := string(resultByte)
 	//result为响应体
 	logs.Info("GetAccessToken 的返回体是", result)
 	str := strings.Split(result, "&")[0]
