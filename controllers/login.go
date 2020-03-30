@@ -62,9 +62,10 @@ func (c *LoginController) ByQq() {
 	logs.Info("调用qq第三方接口都正常")
 	o := orm.NewOrm()
 	var userQQ models.UserQq
-	err := o.QueryTable("user_qq").Filter("open_id", openIdVo.Openid).One(&userQQ)
+	err := o.QueryTable("user_qq").Filter("openid", openIdVo.Openid).One(&userQQ)
 	if err != nil {
 		//没有赋予过值
+		logs.Error("查询user_qq表的发生错误，openid为", openIdVo.Openid, "发生的err错误是", err)
 		//创建user和user_qq
 		user := new(models.User)
 		nickname := userInfo.Nickname
