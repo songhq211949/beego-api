@@ -35,7 +35,7 @@ func main() {
 	//添加过滤器会是跨域访问options请求，这里注意跨域过滤器和验证过滤器的前后顺序
 	beego.InsertFilter("*", beego.BeforeRouter, cors.Allow(&cors.Options{
 		AllowAllOrigins:  false,
-		AllowOrigins:     []string{"http://localhost:8080", ""},
+		AllowOrigins:     []string{"http://localhost:8080", "http://songhq.club"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Authorization", "Access-Control-Allow-Origin", "Access-Control-Allow-Headers", "Content-Type"},
 		ExposeHeaders:    []string{"Content-Length", "Access-Control-Allow-Origin", "Access-Control-Allow-Headers", "Content-Type"},
