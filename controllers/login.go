@@ -120,6 +120,7 @@ func GetUserInfo(accessToken, openId string) *models.QqUserInfoResVO {
 		return vo
 	}
 	defer resp.Body.Close()
+	logs.Info("qq返回的消息是", resp)
 	//获取响应内容
 	c := make([]byte, 2048)
 	var result string
@@ -141,6 +142,7 @@ func GetOpenID(accessToken string) *models.QqOpenIdResVO {
 		logs.Error("请求", url, "失败", err)
 		return vo
 	}
+	logs.Info("qq返回的消息是", resp)
 	defer resp.Body.Close()
 	//获取响应内容
 	c := make([]byte, 2048)
@@ -165,6 +167,7 @@ func GetAccessToken(code, redirect_uri string) string {
 		"client_id=" + appId + "&client_secret=" + appIdKey + "&code=" + code +
 		"&redirect_uri=" + redirect_uri
 	resp, err := http.Get(url)
+	logs.Info("qq返回的消息是", resp)
 	if err != nil {
 		logs.Error("请求", url, "失败", err)
 		return ""
